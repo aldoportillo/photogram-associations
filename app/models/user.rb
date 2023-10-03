@@ -45,14 +45,16 @@ class User < ApplicationRecord
 
   # User#accepted_sent_follow_requests: returns rows from the follow requests table associated to this user by the sender_id column, where status is 'accepted'
 
+
   # User#accepted_received_follow_requests: returns rows from the follow requests table associated to this user by the recipient_id column, where status is 'accepted'
 
 
   ## Indirect associations
 
   # User#liked_photos: returns rows from the photos table associated to this user through its likes
-
+  has_many(:liked_photos, :through => "likes", :source => "photo")
   # User#commented_photos: returns rows from the photos table associated to this user through its comments
+  has_many(:commented_photos, :through => "comments", :source => "photo")
 
 
   ### Indirect associations built on scoped associations
