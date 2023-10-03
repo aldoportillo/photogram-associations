@@ -76,7 +76,7 @@ class Photo < ApplicationRecord
   #   return matching_users
   # end
   
-  has_many(:fans, :through => "likes", :source => "user")
+  has_many(:fans, :through => "likes", :source => "fan")
   
 
 
