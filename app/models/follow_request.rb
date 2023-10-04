@@ -48,4 +48,9 @@ class FollowRequest < ApplicationRecord
   # end
 
   belongs_to(:recipient, :class_name => "User", :foreign_key => "recipient_id")
+
+  ##This line is used for the Scoped Direct Associations in User
+
+  scope :status, -> { where(status: "accepted") }
+
 end
