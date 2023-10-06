@@ -186,47 +186,46 @@ class User < ApplicationRecord
 
   # User#feed: returns rows from the photos table associated to this user through its leaders (the leaders' own_photos)
 
+  # def feed
+  #   array_of_photo_ids = Array.new
+
+  #   my_leaders = self.leaders
+    
+  #   my_leaders.each do |a_user|
+  #     leader_own_photos = a_user.own_photos
+
+  #     leader_own_photos.each do |a_photo|
+  #       array_of_photo_ids.push(a_photo.id)
+  #     end
+  #   end
+
+  #   matching_photos = Photo.where({ :id => array_of_photo_ids })
+
+  #   return matching_photos
+  # end
+
+  has_many(:feed, :through => "leaders", :source => "own_photos")
+
   # User#discover: returns rows from the photos table associated to this user through its leaders (the leaders' liked_photos)
 
-  
 
+#   def discover
+#     array_of_photo_ids = Array.new
 
-
-
-
-  def feed
-    array_of_photo_ids = Array.new
-
-    my_leaders = self.leaders
+#     my_leaders = self.leaders
     
-    my_leaders.each do |a_user|
-      leader_own_photos = a_user.own_photos
+#     my_leaders.each do |a_user|
+#       leader_liked_photos = a_user.liked_photos
 
-      leader_own_photos.each do |a_photo|
-        array_of_photo_ids.push(a_photo.id)
-      end
-    end
+#       leader_liked_photos.each do |a_photo|
+#         array_of_photo_ids.push(a_photo.id)
+#       end
+#     end
 
-    matching_photos = Photo.where({ :id => array_of_photo_ids })
+#     matching_photos = Photo.where({ :id => array_of_photo_ids })
 
-    return matching_photos
-  end
+#     return matching_photos
+#   end
+# end
 
-  def discover
-    array_of_photo_ids = Array.new
-
-    my_leaders = self.leaders
-    
-    my_leaders.each do |a_user|
-      leader_liked_photos = a_user.liked_photos
-
-      leader_liked_photos.each do |a_photo|
-        array_of_photo_ids.push(a_photo.id)
-      end
-    end
-
-    matching_photos = Photo.where({ :id => array_of_photo_ids })
-
-    return matching_photos
-  end
-end
+# has_many(:discover, :through => "leaders", :source => "liked_photos")

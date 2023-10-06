@@ -51,6 +51,6 @@ class FollowRequest < ApplicationRecord
 
   ##This line is used for the Scoped Direct Associations in User
 
-  scope :status, -> { where(status: "accepted") }
+  scope(:status, -> { where(status: "accepted") })
 
 end
