@@ -17,6 +17,94 @@ class User < ApplicationRecord
     :uniqueness => { :case_sensitive => false },
   })
 
+  #direct association
+
+  # User#comments: returns rows from the comments table associated to this user by the author_id column
+
+  has_many(:comments, :class_name => "Comment", :foreign_key => "author_id")
+
+  # User#own_photos: returns rows from the photos table  associated to this user by the owner_id column
+
+  has_many(:own_photos, :class_name => "Photo", :foreign_key => "owner_id")
+
+  # User#likes: returns rows from the likes table associated to this user by the fan_id column
+
+  has_many(:likes, :class_name => "Like", :foreign_key => "fan_id")
+
+  # User#sent_follow_requests: returns rows from the follow requests table associated to this user by the sender_id column
+  
+  has_many(:sent_follow_requests, :class_name => "FollowRequest", :foreign_key => "sender_id")
+
+  # User#received_follow_requests: returns rows from the follow requests table associated to this user by the recipient_id column
+
+  has_many(:received_follow_requests, :class_name => "FollowRequest", :foreign_key => "recipient_id")
+
+  ### Scoped direct associations
+
+  # User#accepted_sent_follow_requests: returns rows from the follow requests table associated to this user by the sender_id column, where status is 'accepted'
+
+
+
+  has_many(:accepted_sent_follow_requests, -> {status}, :class_name => "FollowRequest", :foreign_key => "sender_id")
+
+  has_many(:accepted_received_follow_requests, -> {status}, :class_name => "FollowRequest", :foreign_key => "recipient_id")
+
+
+  ## Indirect associations
+
+  # User#liked_photos: returns rows from the photos table associated to this user through its likes
+  has_many(:liked_photos, :through => "likes", :source => "photo")
+  # User#commented_photos: returns rows from the photos table associated to this user through its comments
+  has_many(:commented_photos, :through => "comments", :source => "photo")
+
+
+  ### Indirect associations built on scoped associations
+
+  # User#followers: returns rows from the users table associated to this user through its accepted_received_follow_requests (the follow requests' senders)
+
+
+  has_many(:followers, :through => "accepted_received_follow_requests", :source => "sender")
+
+
+  has_many(:leaders, :through => "accepted_sent_follow_requests", :source => "recipient")
+
+  # User#feed: returns rows from the photos table associated to this user through its leaders (the leaders' own_photos)
+
+  has_many(:feed, :through => "leaders", :source => "own_photos")
+  
+
+  #User#discover: returns rows from the photos table associated to this user through its leaders (the leaders' liked_photos)
+  has_many(:discover, :through => "leaders", :source => "liked_photos", :foreign_key => "fan_id")
+
+  # def discover
+  #   array_of_photo_ids = Array.new
+
+  #   my_leaders = self.leaders
+    
+  #   my_leaders.each do |a_user|
+  #     leader_liked_photos = a_user.liked_photos
+
+  #     leader_liked_photos.each do |a_photo|
+  #       array_of_photo_ids.push(a_photo.id)
+  #     end
+  #   end
+
+  #   matching_photos = Photo.where({ :id => array_of_photo_ids })
+
+  #   return matching_photos
+  # end
+end
+
+
+
+
+
+
+
+
+
+
+
   # Association accessor methods to define:
   
   ## Direct associations
@@ -90,32 +178,7 @@ class User < ApplicationRecord
 
   #   return matching_follow_requests
   # end
-
-
-  # User#comments: returns rows from the comments table associated to this user by the author_id column
-
-  has_many(:comments, :class_name => "Comment", :foreign_key => "author_id")
-
-  # User#own_photos: returns rows from the photos table  associated to this user by the owner_id column
-
-  has_many(:own_photos, :class_name => "Photo", :foreign_key => "owner_id")
-
-  # User#likes: returns rows from the likes table associated to this user by the fan_id column
-
-  has_many(:likes, :class_name => "Like", :foreign_key => "fan_id")
-
-  # User#sent_follow_requests: returns rows from the follow requests table associated to this user by the sender_id column
-  
-  has_many(:sent_follow_requests, :class_name => "FollowRequest", :foreign_key => "sender_id")
-
-  # User#received_follow_requests: returns rows from the follow requests table associated to this user by the recipient_id column
-
-  has_many(:received_follow_requests, :class_name => "FollowRequest", :foreign_key => "recipient_id")
-
-  ### Scoped direct associations
-
-  # User#accepted_sent_follow_requests: returns rows from the follow requests table associated to this user by the sender_id column, where status is 'accepted'
-
+  # User#accepted_received_follow_requests: returns rows from the follow requests table associated to this user by the recipient_id column, where status is 'accepted'
   # def accepted_sent_follow_requests
   #   my_sent_follow_requests = self.sent_follow_requests
 
@@ -123,11 +186,7 @@ class User < ApplicationRecord
 
   #   return matching_follow_requests
   # end
-
-  has_many(:accepted_sent_follow_requests, -> {status}, :class_name => "FollowRequest", :foreign_key => "sender_id")
-
-  # User#accepted_received_follow_requests: returns rows from the follow requests table associated to this user by the recipient_id column, where status is 'accepted'
-
+  
   # def accepted_received_follow_requests
   #   my_received_follow_requests = self.received_follow_requests
 
@@ -136,22 +195,8 @@ class User < ApplicationRecord
   #   return matching_follow_requests
   # end
 
-  has_many(:accepted_received_follow_requests, -> {status}, :class_name => "FollowRequest", :foreign_key => "recipient_id")
 
-
-  ## Indirect associations
-
-  # User#liked_photos: returns rows from the photos table associated to this user through its likes
-  has_many(:liked_photos, :through => "likes", :source => "photo")
-  # User#commented_photos: returns rows from the photos table associated to this user through its comments
-  has_many(:commented_photos, :through => "comments", :source => "photo")
-
-
-  ### Indirect associations built on scoped associations
-
-  # User#followers: returns rows from the users table associated to this user through its accepted_received_follow_requests (the follow requests' senders)
-
-  # def followers
+      # def followers
   #   my_accepted_received_follow_requests = self.accepted_received_follow_requests
     
   #   array_of_user_ids = Array.new
@@ -163,9 +208,6 @@ class User < ApplicationRecord
   #   matching_users = User.where({ :id => array_of_user_ids })
 
   #   return matching_users
-  # end
-
-  has_many(:followers, :through => "accepted_received_follow_requests", :source => "sender")
   
   # User#leaders: returns rows from the users table associated to this user through its accepted_sent_follow_requests (the follow requests' recipients)
   # def leaders
@@ -182,11 +224,7 @@ class User < ApplicationRecord
   #   return matching_users
   # end
 
-  has_many(:leaders, :through => "accepted_sent_follow_requests", :source => "recipient")
-
-  # User#feed: returns rows from the photos table associated to this user through its leaders (the leaders' own_photos)
-
-  # def feed
+    # def feed
   #   array_of_photo_ids = Array.new
 
   #   my_leaders = self.leaders
@@ -203,29 +241,3 @@ class User < ApplicationRecord
 
   #   return matching_photos
   # end
-
-  has_many(:feed, :through => "leaders", :source => "own_photos")
-
-  # User#discover: returns rows from the photos table associated to this user through its leaders (the leaders' liked_photos)
-
-
-#   def discover
-#     array_of_photo_ids = Array.new
-
-#     my_leaders = self.leaders
-    
-#     my_leaders.each do |a_user|
-#       leader_liked_photos = a_user.liked_photos
-
-#       leader_liked_photos.each do |a_photo|
-#         array_of_photo_ids.push(a_photo.id)
-#       end
-#     end
-
-#     matching_photos = Photo.where({ :id => array_of_photo_ids })
-
-#     return matching_photos
-#   end
-# end
-
-# has_many(:discover, :through => "leaders", :source => "liked_photos")
